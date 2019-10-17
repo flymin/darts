@@ -9,7 +9,7 @@ class Cell(nn.Module):
 
   def __init__(self, genotype, C_prev_prev, C_prev, C, reduction, reduction_prev):
     super(Cell, self).__init__()
-    print(C_prev_prev, C_prev, C)
+    # print(C_prev_prev, C_prev, C)
 
     if reduction_prev:
       self.preprocess0 = FactorizedReduce(C_prev_prev, C)
@@ -24,6 +24,8 @@ class Cell(nn.Module):
       op_names, indices = zip(*genotype.normal)
       concat = genotype.normal_concat
     self._compile(C, op_names, indices, concat, reduction)
+    self.C_prev_prev = C_prev_prev
+    self.C_prev = C_prev
 
   def _compile(self, C, op_names, indices, concat, reduction):
     assert len(op_names) == len(indices)
@@ -38,7 +40,7 @@ class Cell(nn.Module):
       self._ops += [op]
     self._indices = indices
 
-  def forward(self, s0, s1, drop_prob):
+  def forward(self, s0, s1, drop_prob=0.2):
     s0 = self.preprocess0(s0)
     s1 = self.preprocess1(s1)
 
