@@ -67,7 +67,7 @@ class AuxiliaryHeadCIFAR(nn.Module):
     super(AuxiliaryHeadCIFAR, self).__init__()
     self.features = nn.Sequential(
       nn.ReLU(inplace=True),
-      nn.AvgPool2d(5, stride=3, padding=0, count_include_pad=False), # image size = 2 x 2
+      nn.AvgPool2d(3, stride=1, padding=0, count_include_pad=False), # image size = 2 x 2
       nn.Conv2d(C, 128, 1, bias=False),
       nn.BatchNorm2d(128),
       nn.ReLU(inplace=True),
@@ -115,7 +115,7 @@ class NetworkCIFAR(nn.Module):
     self._layers = layers
     self._auxiliary = auxiliary
 
-    stem_multiplier = 3
+    stem_multiplier = 1
     C_curr = stem_multiplier*C
     self.stem = nn.Sequential(
       nn.Conv2d(3, C_curr, 3, padding=1, bias=False),
@@ -126,7 +126,7 @@ class NetworkCIFAR(nn.Module):
     self.cells = nn.ModuleList()
     reduction_prev = False
     for i in range(layers):
-      if i in [layers//3, 2*layers//3]:
+      if i in [layers//4, 2*layers//4, 3*layers//4]:
         C_curr *= 2
         reduction = True
       else:
@@ -135,7 +135,7 @@ class NetworkCIFAR(nn.Module):
       reduction_prev = reduction
       self.cells += [cell]
       C_prev_prev, C_prev = C_prev, cell.multiplier*C_curr
-      if i == 2*layers//3:
+      if i == 3*layers//4:
         C_to_auxiliary = C_prev
 
     if auxiliary:
@@ -145,10 +145,10 @@ class NetworkCIFAR(nn.Module):
 
   def forward(self, input):
     logits_aux = None
-    s0 = s1 = self.stem(input)
+    s0 = s1 = self.stem(input)    # [4, 108, 32, 32]
     for i, cell in enumerate(self.cells):
       s0, s1 = s1, cell(s0, s1, self.drop_path_prob)
-      if i == 2*self._layers//3:
+      if i == 3*self._layers//4:
         if self._auxiliary and self.training:
           logits_aux = self.auxiliary_head(s1)
     out = self.global_pooling(s1)

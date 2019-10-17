@@ -91,12 +91,21 @@ def save_checkpoint(state, is_best, save):
     shutil.copyfile(filename, best_filename)
 
 
-def save(model, model_path):
-  torch.save(model.state_dict(), model_path)
+def save(model, epoch, model_path):
+  weight = {
+        "epoch": epoch,
+        "weight": model.state_dict()
+  }
+  torch.save(weight, model_path)
 
 
 def load(model, model_path):
   model.load_state_dict(torch.load(model_path))
+
+def resume(model, model_path):
+  weight = torch.load(model_path)
+  model.load_state_dict(weight["weight"])
+  return weight["epoch"]
 
 
 def drop_path(x, drop_prob):
