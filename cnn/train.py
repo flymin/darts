@@ -41,7 +41,10 @@ parser.add_argument('--grad_clip', type=float, default=5, help='gradient clippin
 parser.add_argument('--resume', type=str, default="", help="resume exp dir")
 args = parser.parse_args()
 
-args.save = 'evalv1-{}-{}'.format(args.save, time.strftime("%Y%m%d-%H%M%S"))
+# args.save = 'evalPC-DARTS-{}-{}'.format(args.save, time.strftime(
+#   "%Y%m%d-%H%M%S"))
+args.save = 'eval-{}'.format(args.arch)
+
 utils.create_exp_dir(args.save, scripts_to_save=glob.glob('*.py'))
 
 log_format = '%(asctime)s %(message)s'
