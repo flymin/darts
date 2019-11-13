@@ -127,13 +127,16 @@ class NetworkCIFAR(nn.Module):
     C_prev_prev, C_prev, C_curr = C_curr, C_curr, C
     self.cells = nn.ModuleList()
     reduction_prev = False
+    cell_num = 0
     for i in range(layers):
       if i in [layers//4, 2*layers//4, 3*layers//4]:
         C_curr *= 2
         reduction = True
+        cell_num += 1
       else:
         reduction = False
-      cell = Cell(genotype, C_prev_prev, C_prev, C_curr, reduction, reduction_prev)
+      cell = Cell(genotype[cell_num], C_prev_prev, C_prev, C_curr, reduction,
+                  reduction_prev)
       reduction_prev = reduction
       self.cells += [cell]
       C_prev_prev, C_prev = C_prev, cell.multiplier*C_curr
